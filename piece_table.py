@@ -67,6 +67,33 @@ class PieceTable:
         self._buffer[ADD] += text
         self._pieces[index:index+1] = ps
 
+    def delete(self, start, length):
+        if not (0 <= start <= len(self.text) - 1):
+            raise PieceTableError
+
+        if length == 0:
+            return
+
+        l_index, l_offset = self._get_index_and_offset(start)
+        ps = []
+        if start - l_offset > 0:
+            p = Piece(self._pieces[l_index].type,
+                      self._pieces[l_index].start,
+                      start - l_offset)
+            ps.append(p)
+
+        r_index = len(self._pieces) - 1
+        if start + length < len(self.text):
+            r_index, r_offset = self._get_index_and_offset(start + length)
+            piece = self._pieces[r_index]
+            r_start = piece.start + (start + length) - r_offset
+            p = Piece(piece.type,
+                      r_start,
+                      piece.start + piece.length - r_start)
+            ps.append(p)
+
+        self._pieces[l_index:r_index+1] = ps
+
     def _get_index_and_offset(self, start):
         s = ''
         for i, p in enumerate(self._pieces):
